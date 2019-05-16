@@ -3,7 +3,7 @@ module Ponto
 
     attr_reader :base_uri
 
-    def initialize(token:, api_scheme: "https", api_host: "api.myponto.com", api_port: "444", ssl_ca_file: nil)
+    def initialize(token:, api_scheme: "https", api_host: "api.myponto.com", api_port: "443", ssl_ca_file: nil)
       @token    = token
       @base_uri = "#{api_scheme}://#{api_host}:#{api_port}"
       @ssl_ca_file = ssl_ca_file
