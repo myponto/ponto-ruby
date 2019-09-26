@@ -1,10 +1,12 @@
 module Ponto
   class Client
 
-    attr_reader :base_uri
+    attr_reader :base_uri, :client_id, :client_secret
 
-    def initialize(token:, api_scheme: "https", api_host: "api.myponto.com", api_port: "443", ssl_ca_file: nil)
+    def initialize(token: nil, client_id: nil, client_secret: nil, api_scheme: "https", api_host: "api.myponto.com", api_port: "443", ssl_ca_file: nil)
       @token    = token
+      @client_id = client_id
+      @client_secret = client_secret
       @base_uri = "#{api_scheme}://#{api_host}:#{api_port}"
       @ssl_ca_file = ssl_ca_file
     end
@@ -14,8 +16,8 @@ module Ponto
       execute(method: :get, uri: uri, headers: headers, query_params: query_params)
     end
 
-    def post(uri:, payload:, query_params: {})
-      headers = build_headers()
+    def post(uri:, payload:, query_params: {}, headers: nil)
+      headers = build_headers(extra_headers: headers)
       execute(method: :post, uri: uri, headers: headers, query_params: query_params, payload: payload)
     end
 
@@ -40,7 +42,7 @@ module Ponto
         method:      method,
         url:         uri,
         headers:     headers.merge(params: query_params),
-        payload:     payload ? payload.to_json : nil,
+        payload:     payload && headers[:content_type] == :json ? payload.to_json : payload,
         ssl_ca_file: @ssl_ca_file
       }
       raw_response = RestClient::Request.execute(query) do |response, request, result, &block|
@@ -59,12 +61,8 @@ module Ponto
         content_type:  :json,
         accept:        :json,
       }
-      headers["Authorization"] = "Bearer #{@token}"
-      if extra_headers.nil?
-        headers
-      else
-        extra_headers.merge(headers)
-      end
+      headers[:authorization] = "Bearer #{@token}"
+      headers.merge(extra_headers || {})
     end
   end
 end

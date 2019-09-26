@@ -4,17 +4,20 @@ require "uri"
 require "rest_client"
 require "json"
 require "securerandom"
+require "base64"
 
 require_relative "ponto/util"
 require_relative "ponto/error"
 require_relative "ponto/collection"
 require_relative "ponto/client"
 require_relative "ponto/api/base_resource"
+require_relative "ponto/api/o_auth_resource"
 require_relative "ponto/api/account"
 require_relative "ponto/api/transaction"
 require_relative "ponto/api/financial_institution"
 require_relative "ponto/api/payment_initiation_request"
 require_relative "ponto/api/synchronization"
+require_relative "ponto/api/access_token"
 
 module Ponto
   class << self
@@ -32,6 +35,8 @@ module Ponto
 
     def configuration
       @configuration ||= Struct.new(
+        :client_id,
+        :client_secret,
         :token,
         :api_scheme,
         :api_host,
