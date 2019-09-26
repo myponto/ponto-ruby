@@ -11,23 +11,23 @@ module Ponto
       @ssl_ca_file = ssl_ca_file
     end
 
-    def get(uri:, query_params: {}, headers: nil)
-      headers = build_headers(extra_headers: headers)
+    def get(uri:, query_params: {}, headers: nil, access_token: nil)
+      headers = build_headers(access_token: access_token, extra_headers: headers)
       execute(method: :get, uri: uri, headers: headers, query_params: query_params)
     end
 
-    def post(uri:, payload:, query_params: {}, headers: nil)
-      headers = build_headers(extra_headers: headers)
+    def post(uri:, payload:, query_params: {}, headers: nil, access_token: nil)
+      headers = build_headers(access_token: access_token, extra_headers: headers)
       execute(method: :post, uri: uri, headers: headers, query_params: query_params, payload: payload)
     end
 
-    def patch(uri:, payload:, query_params: {})
-      headers = build_headers()
+    def patch(uri:, payload:, query_params: {}, access_token: nil)
+      headers = build_headers(access_token: access_token)
       execute(method: :patch, uri: uri, headers: headers, query_params: query_params, payload: payload)
     end
 
-    def delete(uri:, query_params: {})
-      headers = build_headers()
+    def delete(uri:, query_params: {}, access_token: nil)
+      headers = build_headers(access_token: access_token)
       execute(method: :delete, uri: uri, headers: headers, query_params: query_params)
     end
 
@@ -56,12 +56,12 @@ module Ponto
       JSON.parse(raw_response)
     end
 
-    def build_headers(extra_headers: nil)
+    def build_headers(access_token: nil, extra_headers: nil)
       headers = {
         content_type:  :json,
         accept:        :json,
       }
-      headers[:authorization] = "Bearer #{@token}"
+      headers[:authorization] = "Bearer #{access_token || @token}"
       headers.merge(extra_headers || {})
     end
   end
