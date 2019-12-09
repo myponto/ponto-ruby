@@ -1,6 +1,6 @@
 module Ponto
   class BaseResource < OpenStruct
-    def self.create_by_uri(uri:, resource_type:, attributes:, meta: nil)
+    def self.create_by_uri(uri:, resource_type:, attributes:, access_token:, meta: nil)
       payload = {
         data: {
           type:       resource_type,
@@ -8,12 +8,12 @@ module Ponto
         }
       }
       payload[:data][:meta] = meta if meta
-      raw_item = Ponto.client.post(uri: uri, payload: payload)
+      raw_item = Ponto.client.post(uri: uri, payload: payload, access_token: access_token)
       new(raw_item["data"])
     end
 
-    def self.list_by_uri(uri:, query_params: {}, headers: nil)
-      raw_response = Ponto.client.get(uri: uri, query_params: query_params, headers: headers)
+    def self.list_by_uri(uri:, access_token:, query_params: {}, headers: nil)
+      raw_response = Ponto.client.get(uri: uri, query_params: query_params, headers: headers, access_token: access_token)
       items        = raw_response["data"].map do |raw_item|
         new(raw_item)
       end
@@ -27,12 +27,12 @@ module Ponto
       )
     end
 
-    def self.find_by_uri(uri:, headers: nil)
-      new(find_raw_by_uri(uri: uri, headers: headers))
+    def self.find_by_uri(uri:, access_token:, headers: nil)
+      new(find_raw_by_uri(uri: uri, headers: headers, access_token: access_token))
     end
 
-    def self.find_raw_by_uri(uri:, headers: nil)
-      raw_item = Ponto.client.get(uri: uri, headers: headers)
+    def self.find_raw_by_uri(uri:, access_token:, headers: nil)
+      raw_item = Ponto.client.get(uri: uri, headers: headers, access_token: access_token)
       raw_item["data"]
     end
 
