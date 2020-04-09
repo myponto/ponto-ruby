@@ -26,8 +26,8 @@ module Ponto
       execute(method: :patch, uri: uri, headers: headers, query_params: query_params, payload: payload)
     end
 
-    def delete(uri:, query_params: {}, access_token: nil)
-      headers = build_headers(access_token: access_token)
+    def delete(uri:, query_params: {}, access_token: nil, headers: nil)
+      headers = build_headers(access_token: access_token, extra_headers: headers)
       execute(method: :delete, uri: uri, headers: headers, query_params: query_params)
     end
 

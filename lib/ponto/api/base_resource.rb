@@ -36,6 +36,11 @@ module Ponto
       raw_item["data"]
     end
 
+    def self.destroy_by_uri(uri:, access_token:, headers: nil)
+      raw_item = Ponto.client.delete(uri: uri, headers: headers, access_token: access_token)
+      new(raw_item["data"])
+    end
+
     def initialize(raw)
       attributes = prepare_attributes(raw)
       super(attributes)

@@ -15,7 +15,7 @@ require_relative "ponto/api/o_auth_resource"
 require_relative "ponto/api/account"
 require_relative "ponto/api/transaction"
 require_relative "ponto/api/financial_institution"
-require_relative "ponto/api/payment_initiation_request"
+require_relative "ponto/api/payment"
 require_relative "ponto/api/synchronization"
 require_relative "ponto/api/access_token"
 
