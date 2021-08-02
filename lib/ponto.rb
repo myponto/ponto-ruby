@@ -27,7 +27,7 @@ module Ponto
   class << self
     def client
       options = configuration.to_h.delete_if { |_, v| v.nil? }
-      @client ||= Ponto::Client.new(options)
+      @client ||= Ponto::Client.new(**options)
     end
 
     def configure
