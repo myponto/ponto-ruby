@@ -12,6 +12,18 @@ module Ponto
       new(raw_item["data"])
     end
 
+    def self.update_by_uri(uri:, resource_type:, attributes:, access_token:, meta: nil)
+      payload = {
+        data: {
+          type:       resource_type,
+          attributes: attributes
+        }
+      }
+      payload[:data][:meta] = meta if meta
+      raw_item = Ponto.client.patch(uri: uri, payload: payload, access_token: access_token)
+      new(raw_item["data"])
+    end
+
     def self.list_by_uri(uri:, access_token:, query_params: {}, headers: nil)
       raw_response = Ponto.client.get(uri: uri, query_params: query_params, headers: headers, access_token: access_token)
       items        = raw_response["data"].map do |raw_item|
