@@ -1,0 +1,30 @@
+name: Ruby CI
+
+on: [push]
+
+jobs:
+  test:
+
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ['2.6', '2.7', '3.0']
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically      
+    - name: Run tests
+      run: bundle exec rspec
+    - name: Notify slack failure on master branch
+      if: contains(github.ref, 'master') && failure()
+      env:
+        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      uses: voxmedia/github-action-slack-notify-build@v1.1.2
+      with:
+        channel: ibanity-support-tech
+        status: FAILED
+        color: danger
