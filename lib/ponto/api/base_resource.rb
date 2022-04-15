@@ -40,7 +40,7 @@ module Ponto
     end
 
     def self.find_by_uri(uri:, access_token:, headers: nil)
-      new(find_raw_by_uri(uri: uri, headers: headers, access_token: access_token))
+      new(find_raw_by_uri(uri: uri, headers: headers, access_token: access_token), access_token)
     end
 
     def self.find_raw_by_uri(uri:, access_token:, headers: nil)
@@ -53,12 +53,12 @@ module Ponto
       new(raw_item["data"])
     end
 
-    def initialize(raw)
+    def initialize(raw, access_token = nil)
       attributes = prepare_attributes(raw)
       super(attributes)
 
       relationships = raw["relationships"] || {}
-      setup_relationships(relationships)
+      setup_relationships(relationships, access_token)
 
       links = raw["links"] || {}
       setup_links(links)
@@ -87,22 +87,20 @@ module Ponto
       Ponto::Util.underscorize_hash(params)
     end
 
-    def setup_relationships(relationships)
+    def setup_relationships(relationships, access_token)
       relationships.each do |key, relationship|
         if relationship["data"]
-          klass = Ponto.const_get(Ponto::Util.camelize(key))
           method_name = Ponto::Util.underscore(key)
           define_singleton_method(method_name) do |headers: nil|
-            klass.find_by_uri(uri: relationship["links"]["related"], headers: headers)
+            get_klass(key).find_by_uri(uri: relationship["links"]["related"], headers: headers, access_token: access_token)
           end
           self[Ponto::Util.underscore("#{key}_id")] = relationship["data"]["id"]
         else
           singular_key = key[0..-2]
-          klass        = Ponto.const_get(Ponto::Util.camelize(singular_key))
           method_name  = Ponto::Util.underscore(key)
           define_singleton_method(method_name) do |headers: nil, **query_params|
             uri = relationship["links"]["related"]
-            klass.list_by_uri(uri: uri, headers: headers, query_params: query_params)
+            get_klass(singular_key).list_by_uri(uri: uri, headers: headers, query_params: query_params, access_token: access_token)
           end
         end
       end
@@ -112,6 +110,11 @@ module Ponto
       links.each do |key, link|
         self[Ponto::Util.underscore("#{key}_link")] = link
       end
+    end
+
+    def get_klass(key)
+      key = "transaction" if key == "updatedTransaction"
+      Ponto.const_get(Ponto::Util.camelize(key))
     end
   end
 end
