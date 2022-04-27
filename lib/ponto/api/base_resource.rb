@@ -90,11 +90,19 @@ module Ponto
     def setup_relationships(relationships, access_token)
       relationships.each do |key, relationship|
         if relationship["data"]
+          resource = relationship.dig("data", "type") || key
           method_name = Ponto::Util.underscore(key)
           define_singleton_method(method_name) do |headers: nil|
-            get_klass(key).find_by_uri(uri: relationship["links"]["related"], headers: headers, access_token: access_token)
+            get_klass(resource).find_by_uri(uri: relationship["links"]["related"], headers: headers, access_token: access_token)
           end
           self[Ponto::Util.underscore("#{key}_id")] = relationship["data"]["id"]
+        elsif relationship.dig("links", "meta", "type")
+          resource = relationship.dig("links", "meta", "type")
+          method_name  = Ponto::Util.underscore(key)
+          define_singleton_method(method_name) do |headers: nil, **query_params|
+            uri = relationship["links"]["related"]
+            get_klass(resource).list_by_uri(uri: uri, headers: headers, query_params: query_params, access_token: access_token)
+          end
         else
           singular_key = key[0..-2]
           method_name  = Ponto::Util.underscore(key)
@@ -113,7 +121,6 @@ module Ponto
     end
 
     def get_klass(key)
-      key = "transaction" if key == "updatedTransaction"
       Ponto.const_get(Ponto::Util.camelize(key))
     end
   end
