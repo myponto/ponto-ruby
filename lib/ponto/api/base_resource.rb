@@ -45,7 +45,12 @@ module Ponto
 
     def self.find_raw_by_uri(uri:, access_token:, headers: nil)
       raw_item = Ponto.client.get(uri: uri, headers: headers, access_token: access_token)
-      raw_item["data"]
+
+      if raw_item["attributes"]
+        raw_item
+      else
+        raw_item["data"]
+      end
     end
 
     def self.destroy_by_uri(uri:, access_token:, headers: nil)
